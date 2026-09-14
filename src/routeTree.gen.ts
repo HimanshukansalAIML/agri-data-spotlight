@@ -10,11 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LogisticsRouteImport } from './routes/logistics'
+import { Route as MandisRouteImport } from './routes/mandis'
 import { Route as PricesRouteImport } from './routes/prices'
+import { Route as WeatherRouteImport } from './routes/weather'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LogisticsRoute = LogisticsRouteImport.update({
+  id: '/logistics',
+  path: '/logistics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MandisRoute = MandisRouteImport.update({
+  id: '/mandis',
+  path: '/mandis',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricesRoute = PricesRouteImport.update({
@@ -22,31 +35,48 @@ const PricesRoute = PricesRouteImport.update({
   path: '/prices',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WeatherRoute = WeatherRouteImport.update({
+  id: '/weather',
+  path: '/weather',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/logistics': typeof LogisticsRoute
+  '/mandis': typeof MandisRoute
   '/prices': typeof PricesRoute
+  '/weather': typeof WeatherRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/logistics': typeof LogisticsRoute
+  '/mandis': typeof MandisRoute
   '/prices': typeof PricesRoute
+  '/weather': typeof WeatherRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/logistics': typeof LogisticsRoute
+  '/mandis': typeof MandisRoute
   '/prices': typeof PricesRoute
+  '/weather': typeof WeatherRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/prices'
+  fullPaths: '/' | '/logistics' | '/mandis' | '/prices' | '/weather'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/prices'
-  id: '__root__' | '/' | '/prices'
+  to: '/' | '/logistics' | '/mandis' | '/prices' | '/weather'
+  id: '__root__' | '/' | '/logistics' | '/mandis' | '/prices' | '/weather'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LogisticsRoute: typeof LogisticsRoute
+  MandisRoute: typeof MandisRoute
   PricesRoute: typeof PricesRoute
+  WeatherRoute: typeof WeatherRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,6 +88,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/logistics': {
+      id: '/logistics'
+      path: '/logistics'
+      fullPath: '/logistics'
+      preLoaderRoute: typeof LogisticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mandis': {
+      id: '/mandis'
+      path: '/mandis'
+      fullPath: '/mandis'
+      preLoaderRoute: typeof MandisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/prices': {
       id: '/prices'
       path: '/prices'
@@ -65,12 +109,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PricesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/weather': {
+      id: '/weather'
+      path: '/weather'
+      fullPath: '/weather'
+      preLoaderRoute: typeof WeatherRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LogisticsRoute: LogisticsRoute,
+  MandisRoute: MandisRoute,
   PricesRoute: PricesRoute,
+  WeatherRoute: WeatherRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
