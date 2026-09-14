@@ -90,7 +90,7 @@ function WeatherPage() {
   return (
     <Shell
       title="Weather impact"
-      subtitle={`${filters.state} · last ${filters.days} days`}
+      subtitle={`${filters.state} · ${filters.days === 0 ? "all data" : `last ${filters.days} days`}`}
     >
       {!view ? (
         <Loading />

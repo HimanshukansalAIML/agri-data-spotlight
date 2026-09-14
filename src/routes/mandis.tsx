@@ -108,7 +108,7 @@ function MandisPage() {
   return (
     <Shell
       title="Mandis"
-      subtitle={`${filters.state} · ${filters.crop} · last ${filters.days} days`}
+      subtitle={`${filters.state} · ${filters.crop} · ${filters.days === 0 ? "all data" : `last ${filters.days} days`}`}
     >
       {!rows ? (
         <Loading />

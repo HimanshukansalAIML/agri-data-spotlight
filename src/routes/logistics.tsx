@@ -105,7 +105,7 @@ function LogisticsPage() {
   return (
     <Shell
       title="Logistics"
-      subtitle={`${filters.state} · last ${filters.days} days · delay = over 45 km/h pace + 1.5 h buffer`}
+      subtitle={`${filters.state} · ${filters.days === 0 ? "all data" : `last ${filters.days} days`} · delay = over 45 km/h pace + 1.5 h buffer`}
     >
       {!view ? (
         <Loading />

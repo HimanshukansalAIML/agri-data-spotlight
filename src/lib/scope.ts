@@ -28,7 +28,7 @@ export function useScope(ds: Dataset | undefined, filters: Filters): Scope | nul
   return useMemo(() => {
     if (!ds) return null;
     const to = ds.maxDate;
-    const from = shiftDays(to, -filters.days);
+    const from = filters.days === 0 ? "0000-01-01" : shiftDays(to, -filters.days);
 
     const mandiInScope = ds.meta.mandis.map(
       (m) => filters.state === ALL || m.state === filters.state,

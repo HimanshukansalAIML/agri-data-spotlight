@@ -95,7 +95,7 @@ export function Shell({
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Window</span>
-              <span className="font-medium">{f.days} days</span>
+              <span className="font-medium">{f.days === 0 ? "All data" : `${f.days} days`}</span>
             </div>
           </div>
         </div>
@@ -112,9 +112,9 @@ export function Shell({
             <Select label="Crop" value={f.crop} options={crops} onChange={f.setCrop} />
             <Select
               label="Window"
-              value={String(f.days)}
-              options={["30", "90", "180", "365"]}
-              onChange={(v) => f.setDays(Number(v))}
+              value={f.days === 0 ? "All data" : String(f.days)}
+              options={["All data", "30", "90", "180", "365"]}
+              onChange={(v) => f.setDays(v === "All data" ? 0 : Number(v))}
             />
           </div>
           <nav className="mt-3 flex gap-1 overflow-x-auto lg:hidden">

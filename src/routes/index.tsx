@@ -78,7 +78,7 @@ function Overview() {
   return (
     <Shell
       title="Overview"
-      subtitle={`${filters.state} · ${filters.crop} · last ${filters.days} days`}
+      subtitle={`${filters.state} · ${filters.crop} · ${filters.days === 0 ? "all data" : `last ${filters.days} days`}`}
     >
       {!view || !scope ? (
         <Loading />

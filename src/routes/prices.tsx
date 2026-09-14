@@ -112,7 +112,7 @@ function PricesPage() {
   return (
     <Shell
       title="Prices & MSP"
-      subtitle={`${filters.state} · ${filters.crop} · last ${filters.days} days`}
+      subtitle={`${filters.state} · ${filters.crop} · ${filters.days === 0 ? "all data" : `last ${filters.days} days`}`}
     >
       {!view ? (
         <Loading />

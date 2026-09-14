@@ -19,7 +19,7 @@ export const ALL = "All";
 export function FiltersProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<string>(ALL);
   const [crop, setCrop] = useState<string>(ALL);
-  const [days, setDays] = useState<number>(90);
+  const [days, setDays] = useState<number>(0); // 0 = all available data
 
   const value = useMemo(
     () => ({ state, crop, days, setState, setCrop, setDays }),
