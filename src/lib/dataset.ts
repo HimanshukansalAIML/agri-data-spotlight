@@ -102,8 +102,8 @@ export function pearson(xs: number[], ys: number[]) {
   let dx = 0;
   let dy = 0;
   for (let i = 0; i < n; i++) {
-    const a = xs[i] - mx;
-    const b = ys[i] - my;
+    const a = (xs[i] ?? 0) - mx;
+    const b = (ys[i] ?? 0) - my;
     num += a * b;
     dx += a * a;
     dy += b * b;
