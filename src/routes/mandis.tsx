@@ -49,7 +49,26 @@ function MandisPage() {
       mspN: number;
       trips: number;
     };
+    // Start from every mandi in the metadata so mandis without activity in
+    // the current filter window still appear (with zero/dash values).
     const map = new Map<number, Row>();
+    for (let i = 0; i < meta.mandis.length; i++) {
+      const m = meta.mandis[i];
+      if (filters.state !== "All" && m && m.state !== filters.state) continue;
+      map.set(i, {
+        name: m?.name ?? "?",
+        district: m?.district ?? "?",
+        state: m?.state ?? "?",
+        type: m?.type ?? "—",
+        qtl: 0,
+        farmers: 0,
+        modalSum: 0,
+        modalN: 0,
+        mspSum: 0,
+        mspN: 0,
+        trips: 0,
+      });
+    }
     const ensure = (i: number) => {
       let r = map.get(i);
       if (!r) {
@@ -106,7 +125,11 @@ function MandisPage() {
           : true,
       )
       .sort((a, b) => b.qtl - a.qtl);
-  }, [scope, q]);
+  }, [scope, q, filters.state]);
+
+  const pageCount = rows ? Math.max(1, Math.ceil(rows.length / PAGE_SIZE)) : 1;
+  const safePage = Math.min(page, pageCount - 1);
+  const pageRows = rows ? rows.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE) : [];
 
   return (
     <Shell
