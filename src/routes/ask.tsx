@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Area,
@@ -20,7 +19,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { RotateCcw } from "lucide-react";
+import { KeyRound, RotateCcw } from "lucide-react";
 import { Loading, Panel, Shell } from "@/components/dashboard/Shell";
 import {
   Conversation,
@@ -39,7 +38,8 @@ import { Shimmer } from "@/components/ai-elements/shimmer";
 import { fmtCompact, fmtNum, useDataset, type Dataset } from "@/lib/dataset";
 import { ALL, useFilters } from "@/lib/filters";
 import { runSpec } from "@/lib/ask-engine";
-import { narrateResult, planQuery } from "@/lib/ask.functions";
+import { AiSettings } from "@/components/dashboard/AiSettings";
+import { loadConfig, narrateAnswer, planQuestion, type AiConfig } from "@/lib/ask-client";
 import type { QuerySpec, SpecResult } from "@/lib/query-spec";
 
 export const Route = createFileRoute("/ask")({
