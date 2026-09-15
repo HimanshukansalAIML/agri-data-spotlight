@@ -361,6 +361,10 @@ function AskPage() {
   const ask = useCallback(
     async (question: string) => {
       if (!ds || busy || !question.trim()) return;
+      if (!aiConfig) {
+        setShowSettings(true);
+        return;
+      }
       const base: ChatMessage[] = [
         ...messages,
         { id: `u${Date.now()}`, role: "user", text: question.trim() },
