@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AskRouteImport } from './routes/ask'
 import { Route as LogisticsRouteImport } from './routes/logistics'
 import { Route as MandisRouteImport } from './routes/mandis'
 import { Route as PricesRouteImport } from './routes/prices'
@@ -18,6 +19,11 @@ import { Route as WeatherRouteImport } from './routes/weather'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AskRoute = AskRouteImport.update({
+  id: '/ask',
+  path: '/ask',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LogisticsRoute = LogisticsRouteImport.update({
@@ -43,6 +49,7 @@ const WeatherRoute = WeatherRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ask': typeof AskRoute
   '/logistics': typeof LogisticsRoute
   '/mandis': typeof MandisRoute
   '/prices': typeof PricesRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ask': typeof AskRoute
   '/logistics': typeof LogisticsRoute
   '/mandis': typeof MandisRoute
   '/prices': typeof PricesRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ask': typeof AskRoute
   '/logistics': typeof LogisticsRoute
   '/mandis': typeof MandisRoute
   '/prices': typeof PricesRoute
@@ -65,14 +74,22 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/logistics' | '/mandis' | '/prices' | '/weather'
+  fullPaths: '/' | '/ask' | '/logistics' | '/mandis' | '/prices' | '/weather'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/logistics' | '/mandis' | '/prices' | '/weather'
-  id: '__root__' | '/' | '/logistics' | '/mandis' | '/prices' | '/weather'
+  to: '/' | '/ask' | '/logistics' | '/mandis' | '/prices' | '/weather'
+  id:
+    | '__root__'
+    | '/'
+    | '/ask'
+    | '/logistics'
+    | '/mandis'
+    | '/prices'
+    | '/weather'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AskRoute: typeof AskRoute
   LogisticsRoute: typeof LogisticsRoute
   MandisRoute: typeof MandisRoute
   PricesRoute: typeof PricesRoute
@@ -86,6 +103,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ask': {
+      id: '/ask'
+      path: '/ask'
+      fullPath: '/ask'
+      preLoaderRoute: typeof AskRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/logistics': {
@@ -121,6 +145,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AskRoute: AskRoute,
   LogisticsRoute: LogisticsRoute,
   MandisRoute: MandisRoute,
   PricesRoute: PricesRoute,
