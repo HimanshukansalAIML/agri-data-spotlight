@@ -205,7 +205,7 @@ function AskChart({ spec, result }: { spec: QuerySpec; result: SpecResult }) {
           <YAxis
             type="number"
             dataKey="value2"
-            name={result.series2Label}
+            name={result.series2Label ?? "Value"}
             {...axis}
             tickFormatter={tickFmt}
           />
@@ -255,7 +255,7 @@ function AskChart({ spec, result }: { spec: QuerySpec; result: SpecResult }) {
             <Area
               type="monotone"
               dataKey="value2"
-              name={result.series2Label}
+              name={result.series2Label ?? "Value"}
               stroke="var(--color-chart-3)"
               fill="var(--color-chart-3)"
               fillOpacity={0.12}
@@ -286,7 +286,7 @@ function AskChart({ spec, result }: { spec: QuerySpec; result: SpecResult }) {
           <Line
             type="monotone"
             dataKey="value2"
-            name={result.series2Label}
+            name={result.series2Label ?? "Value"}
             stroke="var(--color-chart-3)"
             dot={false}
             strokeWidth={2}
@@ -322,7 +322,7 @@ function AnswerBlock({ ds, message }: { ds: Dataset; message: ChatMessage }) {
       ) : null}
       {message.text ? (
         <MessageResponse
-          className={message.error ? "text-destructive" : undefined}
+          {...(message.error ? { className: "text-destructive" } : {})}
           isAnimating={false}
         >
           {message.text}
@@ -372,10 +372,7 @@ function AskPage() {
           mandis: ds.meta.mandis.map((m) => m.name),
           districts: ds.meta.districts,
           warehouses: ds.meta.warehouses,
-          dateRange: ["0000-01-01" === "" ? "" : ds.arrivals[0]?.[0] ?? "", ds.maxDate] as [
-            string,
-            string,
-          ],
+          dateRange: [ds.arrivals[0]?.[0] ?? "", ds.maxDate] as [string, string],
         };
         const history = messages.slice(-6).map((m) => ({ role: m.role, text: m.text }));
         const planned = await plan({ data: { question: question.trim(), catalog, history } });
@@ -444,7 +441,7 @@ function AskPage() {
       ) : (
         <Panel
           title="Conversation"
-          hint={messages.length ? `${messages.length} messages · saved in this browser` : undefined}
+          hint={messages.length ? `${messages.length} messages · saved in this browser` : ""}
         >
           <div className="flex h-[calc(100vh-15rem)] min-h-[28rem] flex-col">
             <Conversation className="flex-1">
@@ -520,7 +517,7 @@ function AskPage() {
                 placeholder="e.g. Which mandi has the highest average transit delay?"
               />
               <PromptInputFooter className="justify-end">
-                <PromptInputSubmit status={busy ? "submitted" : undefined} disabled={busy} />
+                <PromptInputSubmit {...(busy ? { status: "submitted" as const } : {})} disabled={busy} />
               </PromptInputFooter>
             </PromptInput>
           </div>
