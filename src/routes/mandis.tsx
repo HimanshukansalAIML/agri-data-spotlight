@@ -24,11 +24,14 @@ export const Route = createFileRoute("/mandis")({
   component: MandisPage,
 });
 
+const PAGE_SIZE = 50;
+
 function MandisPage() {
   const { data } = useDataset();
   const filters = useFilters();
   const scope = useScope(data, filters);
   const [q, setQ] = useState("");
+  const [page, setPage] = useState(0);
 
   const rows = useMemo(() => {
     if (!scope) return null;
