@@ -444,6 +444,14 @@ function AskPage() {
       {isLoading || !ds ? (
         <Loading />
       ) : (
+        <>
+        {showSettings ? (
+          <AiSettings
+            config={aiConfig}
+            onChange={setAiConfig}
+            {...(aiConfig ? { onClose: () => setShowSettings(false) } : {})}
+          />
+        ) : null}
         <Panel
           title="Conversation"
           hint={messages.length ? `${messages.length} messages · saved in this browser` : ""}
