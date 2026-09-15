@@ -14,7 +14,7 @@ export function createGateway(apiKey: string) {
 
 export const ASK_MODEL = "openai/gpt-6-astra";
 
-export const ASK_PROVIDER_OPTIONS = {
+export const ASK_PROVIDER_OPTIONS: Record<string, Record<string, unknown>> = {
   openai: {
     forceReasoning: true,
     reasoningEffort: "low",
@@ -22,4 +22,4 @@ export const ASK_PROVIDER_OPTIONS = {
     store: false,
     include: ["reasoning.encrypted_content"],
   },
-} as const;
+};

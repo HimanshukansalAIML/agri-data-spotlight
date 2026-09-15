@@ -46,13 +46,13 @@ export const querySpecSchema = z.object({
 
 export type QuerySpec = z.infer<typeof querySpecSchema>;
 
-export type SpecRow = { key: string; value: number; value2?: number };
+export type SpecRow = { key: string; value: number; value2?: number | undefined };
 
 export type SpecResult = {
   rows: SpecRow[];
   unit: string;
   seriesLabel: string;
-  series2Label?: string;
+  series2Label?: string | undefined;
   rowCount: number;
 };
 
