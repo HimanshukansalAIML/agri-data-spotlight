@@ -9,6 +9,7 @@ const nav = [
   { to: "/logistics", label: "Logistics" },
   { to: "/weather", label: "Weather" },
   { to: "/mandis", label: "Mandis" },
+  { to: "/ask", label: "Ask AI" },
 ] as const;
 
 function Select({
