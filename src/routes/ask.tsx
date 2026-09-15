@@ -382,7 +382,7 @@ function AskPage() {
           dateRange: [ds.arrivals[0]?.[0] ?? "", ds.maxDate] as [string, string],
         };
         const history = messages.slice(-6).map((m) => ({ role: m.role, text: m.text }));
-        const planned = await plan({ data: { question: question.trim(), catalog, history } });
+        const planned = await planQuestion(aiConfig, question.trim(), catalog, history);
 
         if (planned.kind === "text") {
           persist([
@@ -405,18 +405,16 @@ function AskPage() {
 
         let text = spec.note;
         try {
-          text = await narrate({
-            data: {
-              question: question.trim(),
-              title: spec.title,
-              unit: result.unit,
-              rowCount: result.rowCount,
-              rows: result.rows.slice(0, 40).map((r) => ({
-                key: r.key,
-                value: Number(r.value.toFixed(2)),
-                value2: r.value2 == null ? null : Number(r.value2.toFixed(2)),
-              })),
-            },
+          text = await narrateAnswer(aiConfig, {
+            question: question.trim(),
+            title: spec.title,
+            unit: result.unit,
+            rowCount: result.rowCount,
+            rows: result.rows.slice(0, 40).map((r) => ({
+              key: r.key,
+              value: Number(r.value.toFixed(2)),
+              value2: r.value2 == null ? null : Number(r.value2.toFixed(2)),
+            })),
           });
         } catch {
           /* chart already answers the question; keep the spec note as the summary */
@@ -438,7 +436,7 @@ function AskPage() {
         textareaRef.current?.focus();
       }
     },
-    [ds, busy, messages, persist, plan, narrate, filters.state, filters.crop],
+    [ds, busy, messages, persist, aiConfig, filters.state, filters.crop],
   );
 
   return (
