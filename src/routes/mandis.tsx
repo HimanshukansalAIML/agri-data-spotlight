@@ -24,11 +24,14 @@ export const Route = createFileRoute("/mandis")({
   component: MandisPage,
 });
 
+const PAGE_SIZE = 50;
+
 function MandisPage() {
   const { data } = useDataset();
   const filters = useFilters();
   const scope = useScope(data, filters);
   const [q, setQ] = useState("");
+  const [page, setPage] = useState(0);
 
   const rows = useMemo(() => {
     if (!scope) return null;
@@ -46,7 +49,26 @@ function MandisPage() {
       mspN: number;
       trips: number;
     };
+    // Start from every mandi in the metadata so mandis without activity in
+    // the current filter window still appear (with zero/dash values).
     const map = new Map<number, Row>();
+    for (let i = 0; i < meta.mandis.length; i++) {
+      const m = meta.mandis[i];
+      if (filters.state !== "All" && m && m.state !== filters.state) continue;
+      map.set(i, {
+        name: m?.name ?? "?",
+        district: m?.district ?? "?",
+        state: m?.state ?? "?",
+        type: m?.type ?? "—",
+        qtl: 0,
+        farmers: 0,
+        modalSum: 0,
+        modalN: 0,
+        mspSum: 0,
+        mspN: 0,
+        trips: 0,
+      });
+    }
     const ensure = (i: number) => {
       let r = map.get(i);
       if (!r) {
@@ -103,7 +125,11 @@ function MandisPage() {
           : true,
       )
       .sort((a, b) => b.qtl - a.qtl);
-  }, [scope, q]);
+  }, [scope, q, filters.state]);
+
+  const pageCount = rows ? Math.max(1, Math.ceil(rows.length / PAGE_SIZE)) : 1;
+  const safePage = Math.min(page, pageCount - 1);
+  const pageRows = rows ? rows.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE) : [];
 
   return (
     <Shell
@@ -113,10 +139,16 @@ function MandisPage() {
       {!rows ? (
         <Loading />
       ) : (
-        <Panel title="Mandi directory" hint={`${rows.length} mandis in scope`}>
+        <Panel
+          title="Mandi directory"
+          hint={`${rows.length} mandis in scope · page ${safePage + 1} of ${pageCount}`}
+        >
           <input
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setPage(0);
+            }}
             placeholder="Search mandi, district or state…"
             className="mb-3 w-full max-w-sm rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/40"
           />
@@ -124,6 +156,7 @@ function MandisPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="label-mono border-b border-border text-left">
+                  <th className="py-2 font-medium">#</th>
                   <th className="py-2 font-medium">Mandi</th>
                   <th className="py-2 font-medium">District</th>
                   <th className="py-2 font-medium">State</th>
@@ -135,8 +168,11 @@ function MandisPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {rows.map((r) => (
-                  <tr key={`${r.name}-${r.district}`}>
+                {pageRows.map((r, i) => (
+                  <tr key={`${r.name}-${r.district}`} className={r.qtl === 0 ? "opacity-50" : undefined}>
+                    <td className="py-2 font-mono text-xs text-muted-foreground">
+                      {safePage * PAGE_SIZE + i + 1}
+                    </td>
                     <td className="py-2 font-medium">{r.name}</td>
                     <td className="py-2 text-muted-foreground">{r.district}</td>
                     <td className="py-2 text-muted-foreground">{r.state}</td>
@@ -144,18 +180,46 @@ function MandisPage() {
                     <td className="py-2 text-right font-mono text-muted-foreground">
                       {fmtNum(r.farmers)}
                     </td>
-                    <td className="py-2 text-right font-mono">{fmtRupee(r.modal)}</td>
+                    <td className="py-2 text-right font-mono">
+                      {r.modalN ? fmtRupee(r.modal) : "—"}
+                    </td>
                     <td
-                      className={`py-2 text-right font-mono ${r.gap >= 0 ? "text-positive" : "text-destructive"}`}
+                      className={`py-2 text-right font-mono ${r.modalN && r.mspN ? (r.gap >= 0 ? "text-positive" : "text-destructive") : "text-muted-foreground"}`}
                     >
-                      {r.gap >= 0 ? "+" : ""}
-                      {r.gap.toFixed(1)}%
+                      {r.modalN && r.mspN ? `${r.gap >= 0 ? "+" : ""}${r.gap.toFixed(1)}%` : "—"}
                     </td>
                     <td className="py-2 text-right font-mono text-muted-foreground">{r.trips}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <span className="label-mono text-xs text-muted-foreground">
+              showing {safePage * PAGE_SIZE + 1}–
+              {Math.min((safePage + 1) * PAGE_SIZE, rows.length)} of {rows.length} · 50 per page
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPage(Math.max(0, safePage - 1))}
+                disabled={safePage === 0}
+                className="rounded-md border border-border px-3 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-40 hover:bg-surface"
+              >
+                ← Prev
+              </button>
+              <span className="font-mono text-sm text-muted-foreground">
+                {safePage + 1} / {pageCount}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPage(Math.min(pageCount - 1, safePage + 1))}
+                disabled={safePage >= pageCount - 1}
+                className="rounded-md border border-border px-3 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-40 hover:bg-surface"
+              >
+                Next →
+              </button>
+            </div>
           </div>
         </Panel>
       )}
