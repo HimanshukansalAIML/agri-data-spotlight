@@ -139,10 +139,16 @@ function MandisPage() {
       {!rows ? (
         <Loading />
       ) : (
-        <Panel title="Mandi directory" hint={`${rows.length} mandis in scope`}>
+        <Panel
+          title="Mandi directory"
+          hint={`${rows.length} mandis in scope · page ${safePage + 1} of ${pageCount}`}
+        >
           <input
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setPage(0);
+            }}
             placeholder="Search mandi, district or state…"
             className="mb-3 w-full max-w-sm rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/40"
           />
@@ -150,6 +156,7 @@ function MandisPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="label-mono border-b border-border text-left">
+                  <th className="py-2 font-medium">#</th>
                   <th className="py-2 font-medium">Mandi</th>
                   <th className="py-2 font-medium">District</th>
                   <th className="py-2 font-medium">State</th>
@@ -161,8 +168,11 @@ function MandisPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {rows.map((r) => (
-                  <tr key={`${r.name}-${r.district}`}>
+                {pageRows.map((r, i) => (
+                  <tr key={`${r.name}-${r.district}`} className={r.qtl === 0 ? "opacity-50" : undefined}>
+                    <td className="py-2 font-mono text-xs text-muted-foreground">
+                      {safePage * PAGE_SIZE + i + 1}
+                    </td>
                     <td className="py-2 font-medium">{r.name}</td>
                     <td className="py-2 text-muted-foreground">{r.district}</td>
                     <td className="py-2 text-muted-foreground">{r.state}</td>
@@ -170,18 +180,46 @@ function MandisPage() {
                     <td className="py-2 text-right font-mono text-muted-foreground">
                       {fmtNum(r.farmers)}
                     </td>
-                    <td className="py-2 text-right font-mono">{fmtRupee(r.modal)}</td>
+                    <td className="py-2 text-right font-mono">
+                      {r.modalN ? fmtRupee(r.modal) : "—"}
+                    </td>
                     <td
-                      className={`py-2 text-right font-mono ${r.gap >= 0 ? "text-positive" : "text-destructive"}`}
+                      className={`py-2 text-right font-mono ${r.modalN && r.mspN ? (r.gap >= 0 ? "text-positive" : "text-destructive") : "text-muted-foreground"}`}
                     >
-                      {r.gap >= 0 ? "+" : ""}
-                      {r.gap.toFixed(1)}%
+                      {r.modalN && r.mspN ? `${r.gap >= 0 ? "+" : ""}${r.gap.toFixed(1)}%` : "—"}
                     </td>
                     <td className="py-2 text-right font-mono text-muted-foreground">{r.trips}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <span className="label-mono text-xs text-muted-foreground">
+              showing {safePage * PAGE_SIZE + 1}–
+              {Math.min((safePage + 1) * PAGE_SIZE, rows.length)} of {rows.length} · 50 per page
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPage(Math.max(0, safePage - 1))}
+                disabled={safePage === 0}
+                className="rounded-md border border-border px-3 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-40 hover:bg-surface"
+              >
+                ← Prev
+              </button>
+              <span className="font-mono text-sm text-muted-foreground">
+                {safePage + 1} / {pageCount}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPage(Math.min(pageCount - 1, safePage + 1))}
+                disabled={safePage >= pageCount - 1}
+                className="rounded-md border border-border px-3 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-40 hover:bg-surface"
+              >
+                Next →
+              </button>
+            </div>
           </div>
         </Panel>
       )}
