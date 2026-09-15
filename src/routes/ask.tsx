@@ -493,6 +493,16 @@ function AskPage() {
               <ConversationScrollButton />
             </Conversation>
 
+            <div className="mb-3 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowSettings((v) => !v)}
+                className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground"
+              >
+                <KeyRound className="size-3" /> {aiConfig ? "AI key settings" : "Add your AI key"}
+              </button>
+            </div>
+
             {messages.length === 0 ? (
               <div className="mb-3 flex flex-wrap gap-2">
                 {SUGGESTIONS.map((s) => (
@@ -535,6 +545,7 @@ function AskPage() {
             </PromptInput>
           </div>
         </Panel>
+        </>
       )}
     </Shell>
   );
