@@ -339,11 +339,14 @@ function AskPage() {
   const [busy, setBusy] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const plan = useServerFn(planQuery);
-  const narrate = useServerFn(narrateResult);
+  const [aiConfig, setAiConfig] = useState<AiConfig | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     setMessages(loadStored());
+    const cfg = loadConfig();
+    setAiConfig(cfg);
+    if (!cfg) setShowSettings(true);
   }, []);
 
   const persist = useCallback((next: ChatMessage[]) => {
