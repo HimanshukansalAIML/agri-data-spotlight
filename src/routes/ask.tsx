@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Area,
@@ -20,7 +19,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { RotateCcw } from "lucide-react";
+import { KeyRound, RotateCcw } from "lucide-react";
 import { Loading, Panel, Shell } from "@/components/dashboard/Shell";
 import {
   Conversation,
@@ -39,7 +38,8 @@ import { Shimmer } from "@/components/ai-elements/shimmer";
 import { fmtCompact, fmtNum, useDataset, type Dataset } from "@/lib/dataset";
 import { ALL, useFilters } from "@/lib/filters";
 import { runSpec } from "@/lib/ask-engine";
-import { narrateResult, planQuery } from "@/lib/ask.functions";
+import { AiSettings } from "@/components/dashboard/AiSettings";
+import { loadConfig, narrateAnswer, planQuestion, type AiConfig } from "@/lib/ask-client";
 import type { QuerySpec, SpecResult } from "@/lib/query-spec";
 
 export const Route = createFileRoute("/ask")({
@@ -339,11 +339,14 @@ function AskPage() {
   const [busy, setBusy] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const plan = useServerFn(planQuery);
-  const narrate = useServerFn(narrateResult);
+  const [aiConfig, setAiConfig] = useState<AiConfig | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     setMessages(loadStored());
+    const cfg = loadConfig();
+    setAiConfig(cfg);
+    if (!cfg) setShowSettings(true);
   }, []);
 
   const persist = useCallback((next: ChatMessage[]) => {
@@ -358,6 +361,10 @@ function AskPage() {
   const ask = useCallback(
     async (question: string) => {
       if (!ds || busy || !question.trim()) return;
+      if (!aiConfig) {
+        setShowSettings(true);
+        return;
+      }
       const base: ChatMessage[] = [
         ...messages,
         { id: `u${Date.now()}`, role: "user", text: question.trim() },
@@ -375,7 +382,7 @@ function AskPage() {
           dateRange: [ds.arrivals[0]?.[0] ?? "", ds.maxDate] as [string, string],
         };
         const history = messages.slice(-6).map((m) => ({ role: m.role, text: m.text }));
-        const planned = await plan({ data: { question: question.trim(), catalog, history } });
+        const planned = await planQuestion(aiConfig, question.trim(), catalog, history);
 
         if (planned.kind === "text") {
           persist([
@@ -398,18 +405,16 @@ function AskPage() {
 
         let text = spec.note;
         try {
-          text = await narrate({
-            data: {
-              question: question.trim(),
-              title: spec.title,
-              unit: result.unit,
-              rowCount: result.rowCount,
-              rows: result.rows.slice(0, 40).map((r) => ({
-                key: r.key,
-                value: Number(r.value.toFixed(2)),
-                value2: r.value2 == null ? null : Number(r.value2.toFixed(2)),
-              })),
-            },
+          text = await narrateAnswer(aiConfig, {
+            question: question.trim(),
+            title: spec.title,
+            unit: result.unit,
+            rowCount: result.rowCount,
+            rows: result.rows.slice(0, 40).map((r) => ({
+              key: r.key,
+              value: Number(r.value.toFixed(2)),
+              value2: r.value2 == null ? null : Number(r.value2.toFixed(2)),
+            })),
           });
         } catch {
           /* chart already answers the question; keep the spec note as the summary */
@@ -431,7 +436,7 @@ function AskPage() {
         textareaRef.current?.focus();
       }
     },
-    [ds, busy, messages, persist, plan, narrate, filters.state, filters.crop],
+    [ds, busy, messages, persist, aiConfig, filters.state, filters.crop],
   );
 
   return (
@@ -439,6 +444,14 @@ function AskPage() {
       {isLoading || !ds ? (
         <Loading />
       ) : (
+        <>
+        {showSettings ? (
+          <AiSettings
+            config={aiConfig}
+            onChange={setAiConfig}
+            {...(aiConfig ? { onClose: () => setShowSettings(false) } : {})}
+          />
+        ) : null}
         <Panel
           title="Conversation"
           hint={messages.length ? `${messages.length} messages · saved in this browser` : ""}
@@ -479,6 +492,16 @@ function AskPage() {
               </ConversationContent>
               <ConversationScrollButton />
             </Conversation>
+
+            <div className="mb-3 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowSettings((v) => !v)}
+                className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground"
+              >
+                <KeyRound className="size-3" /> {aiConfig ? "AI key settings" : "Add your AI key"}
+              </button>
+            </div>
 
             {messages.length === 0 ? (
               <div className="mb-3 flex flex-wrap gap-2">
@@ -522,6 +545,7 @@ function AskPage() {
             </PromptInput>
           </div>
         </Panel>
+        </>
       )}
     </Shell>
   );
